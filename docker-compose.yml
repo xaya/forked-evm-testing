@@ -1,0 +1,18 @@
+# Runs a forked blockchain, connected Xaya X and an image with a utility
+# JSON-RPC server (e.g. for mining blocks on demand and sending moves
+# with impersonated addresses).
+
+services:
+
+  basechain:
+    build:
+      context: ./basechain
+    environment:
+      ENDPOINT:  ${BLOCKCHAIN_ENDPOINT}
+      FORK_BLOCK_NUMBER: ${FORK_BLOCK_NUMBER}
+
+  nginx:
+    build:
+      context: ./nginx
+    ports:
+      - "8100:80"
