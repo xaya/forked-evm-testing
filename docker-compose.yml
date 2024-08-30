@@ -10,9 +10,41 @@ services:
     environment:
       ENDPOINT:  ${BLOCKCHAIN_ENDPOINT}
       FORK_BLOCK_NUMBER: ${FORK_BLOCK_NUMBER}
+    stop_grace_period: 1s
+
+  xayax:
+    image: xaya/xayax
+    environment:
+      # We don't really need reorgs at all in the test environment,
+      # so can set this to something very low.
+      MAX_REORG_DEPTH: 1
+    command: [
+      "eth",
+      "--eth_rpc_url=http://nginx/chain",
+      "--eth_ws_url=http://nginx/chain",
+      "--accounts_contract=${ACCOUNTS_CONTRACT}",
+      "--xayax_block_range=90",
+      "--nolisten_locally",
+      "--alsologtostderr",
+    ]
+    stop_grace_period: 1s
+    depends_on:
+      healthcheck_chain:
+        condition: service_healthy
 
   nginx:
     build:
       context: ./nginx
     ports:
       - "8100:80"
+    stop_grace_period: 1s
+
+  healthcheck_chain:
+    build:
+      context: ./healthcheck
+    stop_grace_period: 1s
+    healthcheck:
+      test: ["CMD", "/usr/local/bin/basechain.py"]
+      interval: 1s
+      timeout: 5s
+      retries: 10
