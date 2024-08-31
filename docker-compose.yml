@@ -32,6 +32,23 @@ services:
       healthcheck_chain:
         condition: service_healthy
 
+  gsp:
+    image: ${GSP_IMAGE}
+    command: [
+      "smcd",
+      "--xaya_rpc_url=http://xayax:8000",
+      "--xaya_rpc_protocol=2",
+      "--game_rpc_port=8600",
+      "--nogame_rpc_listen_locally",
+      "--xaya_connection_check_ms=10000",
+      "--xaya_zmq_staleness_ms=10000",
+      "--alsologtostderr",
+    ]
+    stop_grace_period: 1s
+    depends_on:
+      healthcheck_xayax:
+        condition: service_healthy
+
   nginx:
     build:
       context: ./nginx
@@ -45,6 +62,16 @@ services:
     stop_grace_period: 1s
     healthcheck:
       test: ["CMD", "/usr/local/bin/basechain.py"]
+      interval: 1s
+      timeout: 5s
+      retries: 10
+
+  healthcheck_xayax:
+    build:
+      context: ./healthcheck
+    stop_grace_period: 1s
+    healthcheck:
+      test: ["CMD", "/usr/local/bin/xayax.py"]
       interval: 1s
       timeout: 5s
       retries: 10

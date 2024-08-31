@@ -26,6 +26,11 @@ this, some variables have to be defined in the `.env` file (see `.env.example`):
   contract that is used to track moves via Xaya X.  The default value specified
   is the official contract on Polygon mainnet.
 
+- `GSP_IMAGE`:  The Docker image that should be used as the internal GSP.
+  It will be started with standard arguments; if anything specific is required,
+  either the `docker-compose.yml` file needs to be adapted locally, or the
+  Docker image should contain all the required things in its entrypoint.
+
 ## Blockchain Node
 
 When run, the configuration exposes the blockchain node for the forked network
@@ -40,3 +45,7 @@ Xaya X is run internally, connected to the forked blockchain node, and exposed
 to a GSP running inside the Docker Compose.  It is not exposed publicly
 (which would be difficult to do due to having to bind and report its
 IP address for ZMQ notifications).
+
+## GSP
+
+The GSP is exposed through a reverse proxy on `http://localhost:8100/gsp`.
