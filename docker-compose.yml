@@ -49,6 +49,16 @@ services:
       healthcheck_xayax:
         condition: service_healthy
 
+  helper:
+    build:
+      context: ./helper
+    environment:
+      ACCOUNTS_CONTRACT: ${ACCOUNTS_CONTRACT}
+    stop_grace_period: 1s
+    depends_on:
+      healthcheck_chain:
+        condition: service_healthy
+
   nginx:
     build:
       context: ./nginx

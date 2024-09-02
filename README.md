@@ -49,3 +49,29 @@ IP address for ZMQ notifications).
 ## GSP
 
 The GSP is exposed through a reverse proxy on `http://localhost:8100/gsp`.
+
+## Helper Server
+
+The container also runs a JSON-RPC utility server, which provides some
+helper methods to interact more easily and directly with the forked blockchain
+in ways that will be useful for testing Xaya applications.  This server is
+exposed on `http://localhost:8100/helper`.  It provides the following
+methods:
+
+- `mineblock ()`: Mines a new block.
+- `mineblockat (TIMESTAMP)`: Mines a new block with the given UNIX timestamp.
+  The timestamp must be later than the timestamp of the last mined block.
+- `setbalance (ADDRESS, WEI)`: Sets the Ether balance of the given address
+  to the specified value (in Wei).
+- `ensuregas (ADDRESS)`: Ensures that the given address has at least a
+  minimum balance to send usual transactions.
+- `transfertoken (TOKEN, FROM, TO, AMOUNT)`: Transfers a given amount
+  of some ERC-20 token, impersonating the `FROM` account to authorise
+  the transfer.
+- `getname (NS, NAME, ADDRESS)`: Gets the specified Xaya name into the
+  given address.  If the name does not exist, it will be registered (and
+  a WCHI balance is required on `ADDRESS`).  If it exists, it will be
+  transferred to `ADDRESS` using impersonation of the existing owner.
+- `sendmove (NS, NAME, MV)`: Sends a move with the given name without
+  transferring it to a new owner.  If the name does not exist yet, this
+  results in an error.
