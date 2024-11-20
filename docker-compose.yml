@@ -28,6 +28,7 @@ services:
       "--alsologtostderr",
     ]
     stop_grace_period: 1s
+    restart: on-failure
     depends_on:
       healthcheck_chain:
         condition: service_healthy
