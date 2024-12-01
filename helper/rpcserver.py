@@ -13,11 +13,14 @@ from web3.middleware import ExtraDataToPOAMiddleware
 
 import json
 import os
+import time
 
 chainRpc = "http://nginx/chain"
 eth = jsonrpclib.ServerProxy (chainRpc)
 w3 = Web3 (Web3.HTTPProvider (chainRpc))
 w3.middleware_onion.inject (ExtraDataToPOAMiddleware, layer=0)
+
+gsp = jsonrpclib.ServerProxy ("http://nginx/gsp")
 
 
 def loadAbi (nm):
@@ -137,6 +140,9 @@ def sendmove (ns, name, mv):
   itself.  If the name does not exist, this method fails.
   """
 
+  if type (mv) != str:
+    mv = json.dumps (mv, separators=(",", ":"))
+
   if not accounts.functions.exists (ns, name).call ():
     raise RuntimeError ("name %s/%s does not exist yet" % (ns, name))
 
@@ -146,6 +152,24 @@ def sendmove (ns, name, mv):
   accounts.functions.move (ns, name, mv, 2**256-1, 0, "0x" + "00" * 20) \
       .transact ({"from": owner})
   mineblock ()
+
+
+def syncgsp ():
+  """
+  Waits for the GSP to be synced up-to-date to the latest block of the
+  basechain node.
+  """
+
+  blk = w3.eth.get_block ("latest")["hash"].hex ()
+  if blk[:2] == "0x":
+    blk = blk[2:]
+  assert len (blk) == 64
+
+  while True:
+    state = gsp.getnullstate ()
+    if state["state"] == "up-to-date" and state["blockhash"] == blk:
+      break
+    time.sleep (0.1)
 
 
 ################################################################################
@@ -162,5 +186,7 @@ srv.register_function (transfertoken)
 
 srv.register_function (getname)
 srv.register_function (sendmove)
+
+srv.register_function (syncgsp)
 
 srv.serve_forever ()

@@ -74,4 +74,7 @@ methods:
   transferred to `ADDRESS` using impersonation of the existing owner.
 - `sendmove (NS, NAME, MV)`: Sends a move with the given name without
   transferring it to a new owner.  If the name does not exist yet, this
-  results in an error.
+  results in an error.  `MV` can be JSON (that will be formatted into a string)
+  or the move represented as string already.
+- `syncgsp ()`: Waits for the internal GSP to be `up-to-date` and synced to
+  the latest block of the base-chain node.
