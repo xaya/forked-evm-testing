@@ -33,6 +33,19 @@ services:
       healthcheck_chain:
         condition: service_healthy
 
+  db:
+    image: mysql:8
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: example
+      MYSQL_USER: gspuser
+      MYSQL_PASSWORD: gspuserpass
+      MYSQL_DATABASE: gsp
+    healthcheck:
+      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
+
   gsp:
     image: ${GSP_IMAGE}
     command: [
@@ -43,12 +56,18 @@ services:
       "--nogame_rpc_listen_locally",
       "--xaya_connection_check_ms=10000",
       "--xaya_zmq_staleness_ms=10000",
+      "--xaya_sqlite_wal_truncate_ms=1800000",
       "--alsologtostderr",
+      "--archival_db=mysql://gspuser:gspuserpass@db:3306/gsp",
     ]
     stop_grace_period: 1s
     depends_on:
       healthcheck_xayax:
         condition: service_healthy
+      db:
+        condition: service_healthy
+    volumes:
+      - ${PWD}/gsp-sqlite:/xayagame/svt/polygon
 
   helper:
     build:
